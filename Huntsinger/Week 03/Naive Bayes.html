@@ -14709,7 +14709,7 @@ More notebook setup here ...
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="New-Observation">New Observation<a class="anchor-link" href="#New-Observation">¶</a></h4><p>Consider a new unclassified observation [ x1=q ].</p>
+<h4 id="New-Observation">New Observation<a class="anchor-link" href="#New-Observation">¶</a></h4><p>Consider a new unclassified observation [ x1=10, x2=4 ].</p>
 
 </div>
 </div>
@@ -16305,28 +16305,36 @@ $$</p>
 $$
 P(class=B\,|\,x1=u,\,x2=v,...) = \frac{ P(x1=u,\,x2=v,...|\,class=B) \,\times\, P(class=B) }{ P(x1=u,\,x2=v,...) }
 $$<p><br><br>
-Treat x1, x2, ... as mutually independent - this is the "naive" assumption.</p>
+Treat x1, x2, ... as mutually independent - this is the "naive" assumption.  Calculate the posteriors:</p>
 $$
 P(class=A\,|\,x1=u,\,x2=v,...) = \frac{ P(x1=u\,|\,class=A) \,\times\, P(x2=v\,|\,class=A) \,\times\, ... \,\times\, P(class=A) }{ P(x1=u,\,x2=v,...) }
 $$$$
 P(class=B\,|\,x1=u,\,x2=v,...) = \frac{ P(x1=u\,|\,class=B) \,\times\, P(x2=v\,|\,class=B) \,\times\, ... \,\times\, P(class=B) }{ P(x1=u,\,x2=v,...) }
 $$<p><br><br>
-Ignore the denominators because they are equivalent and do not affect which posterior is larger.</p>
+Ignore the denominators because they are equivalent and do not affect the relative sizes of the posteriors:</p>
 $$
-posterior_A = P(x1=u\,|\,class=A) \,\times\, P(x2=v\,|\,class=A) \,\times\, ... \,\times\, P(class=A)
+P(class=A\,|\,x1=u,\,x2=v,...) \approx P(x1=u\,|\,class=A) \,\times\, P(x2=v\,|\,class=A) \,\times\, ... \,\times\, P(class=A)
 $$$$
-posterior_B = P(x1=u\,|\,class=B) \,\times\, P(x2=v\,|\,class=B) \,\times\, ... \,\times\, P(class=B)
+P(class=B\,|\,x1=u,\,x2=v,...) \approx P(x1=u\,|\,class=B) \,\times\, P(x2=v\,|\,class=B) \,\times\, ... \,\times\, P(class=B)
 $$<p><br><br>
-Note the relative sizes of the posteriors.</p>
+Calculate the relative posteriors:</p>
 $$
-relative\,posterior_A = \frac{P(x1=u\,|\,class=A) \,\times\, P(x2=v\,|\,class=A) \,\times\, ... \,\times\, P(class=A)}{S}
-$$$$
-relative\,posterior_B = \frac{P(x1=u\,|\,class=B) \,\times\, P(x2=v\,|\,class=B) \,\times\, ... \,\times\, P(class=B)}{S}
-$$$$
-\begin{align}
-S = &amp; \big[ P(x1=u\,|\,class=A) \,\times\, P(x2=v\,|\,class=A) \,\times\, ... \,\times\, P(class=A) \big] + \\
+relative\,posterior_A = \frac{P(x1=u\,|\,class=A) \,\times\, P(x2=v\,|\,class=A) \,\times\, ... \,\times\, P(class=A)}
+{\begin{align}
+&amp; \big[ P(x1=u\,|\,class=A) \,\times\, P(x2=v\,|\,class=A) \,\times\, ... \,\times\, P(class=A) \big] + \\
     &amp; \big[ P(x1=u\,|\,class=B) \,\times\, P(x2=v\,|\,class=B) \,\times\, ... \,\times\, P(class=B) \big]
-\end{align}
+\end{align}}
+$$<p><br></p>
+$$
+relative\,posterior_B = \frac{P(x1=u\,|\,class=B) \,\times\, P(x2=v\,|\,class=B) \,\times\, ... \,\times\, P(class=B)}
+{\begin{align}
+&amp; \big[ P(x1=u\,|\,class=A) \,\times\, P(x2=v\,|\,class=A) \,\times\, ... \,\times\, P(class=A) \big] + \\
+    &amp; \big[ P(x1=u\,|\,class=B) \,\times\, P(x2=v\,|\,class=B) \,\times\, ... \,\times\, P(class=B) \big]
+\end{align}}
+$$<p><br><br>
+The relative posteriors expressed in succint notation:</p>
+$$
+P(c|X) \approx \frac{\big( \prod_{x \in X} P(x|c) \big) P(c)}{\sum_{c \in C} \big( \big( \prod_{x \in X} P(x|c) \big) P(c) \big)}
 $$<p><br><br>
 Predict the class that corresponds to the relative posterior that exceeds some cutoff.</p>
 
@@ -16336,11 +16344,302 @@ Predict the class that corresponds to the relative posterior that exceeds some c
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Code">Code<a class="anchor-link" href="#Code">¶</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Useful-Functions">Useful Functions<a class="anchor-link" href="#Useful-Functions">¶</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [47]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># as.class # from appartus code cell above</span>
+
+<span class="c1"># help(naiveBayes)         # from e1071 library</span>
+<span class="c1"># help(predict)            # from stats library</span>
+<span class="c1"># help(predict.naiveBayes) # from e1071 library, use predict to call this function</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Templates">Templates<a class="anchor-link" href="#Templates">¶</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [48]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># Construct a naive Bayes model </span>
+
+<span class="n">data.train</span> <span class="o">=</span> <span class="nf">data.frame</span><span class="p">(</span><span class="n">x1</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">,</span><span class="m">5</span><span class="p">,</span><span class="m">6</span><span class="p">,</span><span class="m">7</span><span class="p">,</span><span class="m">8</span><span class="p">),</span> <span class="n">x2</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="m">9</span><span class="p">,</span><span class="m">7</span><span class="p">,</span><span class="m">6</span><span class="p">,</span><span class="m">5</span><span class="p">,</span><span class="m">4</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">1</span><span class="p">),</span> <span class="n">x3</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">"E"</span><span class="p">,</span><span class="s">"C"</span><span class="p">,</span><span class="s">"D"</span><span class="p">,</span><span class="s">"E"</span><span class="p">,</span><span class="s">"C"</span><span class="p">,</span><span class="s">"D"</span><span class="p">,</span><span class="s">"E"</span><span class="p">,</span><span class="s">"E"</span><span class="p">),</span>
+                        <span class="n">class</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">"B"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">,</span> <span class="s">"A"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">,</span> <span class="s">"A"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">))</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="nf">naiveBayes</span><span class="p">(</span><span class="n">class</span> <span class="o">~</span> <span class="n">x1</span><span class="o">+</span><span class="n">x2</span><span class="o">+</span><span class="n">x3</span><span class="p">,</span> <span class="n">data.train</span><span class="p">)</span>
+<span class="n">model</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+
+
+<div class="output_text output_subarea ">
+<pre>
+Naive Bayes Classifier for Discrete Predictors
+
+Call:
+naiveBayes.default(x = X, y = Y, laplace = laplace)
+
+A-priori probabilities:
+Y
+   A    B 
+0.25 0.75 
+
+Conditional probabilities:
+   x1
+Y   [,1]     [,2]
+  A    6 1.414214
+  B    4 2.607681
+
+   x2
+Y       [,1]     [,2]
+  A 3.000000 1.414214
+  B 5.166667 2.857738
+
+   x3
+Y           C         D         E
+  A 0.5000000 0.0000000 0.5000000
+  B 0.1666667 0.3333333 0.5000000
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [49]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># Construct a naive Bayes model with LaPlace smoothing</span>
+
+<span class="n">data.train</span> <span class="o">=</span> <span class="nf">data.frame</span><span class="p">(</span><span class="n">x1</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">,</span><span class="m">5</span><span class="p">,</span><span class="m">6</span><span class="p">,</span><span class="m">7</span><span class="p">,</span><span class="m">8</span><span class="p">),</span> <span class="n">x2</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="m">9</span><span class="p">,</span><span class="m">7</span><span class="p">,</span><span class="m">6</span><span class="p">,</span><span class="m">5</span><span class="p">,</span><span class="m">4</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">1</span><span class="p">),</span> <span class="n">x3</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">"E"</span><span class="p">,</span><span class="s">"C"</span><span class="p">,</span><span class="s">"F"</span><span class="p">,</span><span class="s">"C"</span><span class="p">,</span><span class="s">"D"</span><span class="p">,</span><span class="s">"D"</span><span class="p">,</span><span class="s">"E"</span><span class="p">,</span><span class="s">"F"</span><span class="p">),</span>
+                        <span class="n">class</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">"A"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">,</span> <span class="s">"A"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">,</span> <span class="s">"A"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">,</span> <span class="s">"B"</span><span class="p">))</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="nf">naiveBayes</span><span class="p">(</span><span class="n">class</span> <span class="o">~</span> <span class="n">x1</span><span class="o">+</span><span class="n">x2</span><span class="o">+</span><span class="n">x3</span><span class="p">,</span> <span class="n">data.train</span><span class="p">,</span> <span class="n">laplace</span><span class="o">=</span><span class="kc">TRUE</span><span class="p">)</span>
+<span class="n">model</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+
+
+<div class="output_text output_subarea ">
+<pre>
+Naive Bayes Classifier for Discrete Predictors
+
+Call:
+naiveBayes.default(x = X, y = Y, laplace = laplace)
+
+A-priori probabilities:
+Y
+    A     B 
+0.375 0.625 
+
+Conditional probabilities:
+   x1
+Y   [,1]     [,2]
+  A  3.0 2.000000
+  B  5.4 2.408319
+
+   x2
+Y       [,1]     [,2]
+  A 6.333333 2.516611
+  B 3.600000 2.408319
+
+   x3
+Y           C         D         E         F
+  A 0.1428571 0.2857143 0.2857143 0.2857143
+  B 0.3333333 0.2222222 0.2222222 0.2222222
+</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [50]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1"># Use a naive Bayes model to make predictions</span>
+
+<span class="n">new</span> <span class="o">=</span> <span class="nf">data.frame</span><span class="p">(</span><span class="n">x1</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="m">5</span><span class="p">,</span><span class="m">6</span><span class="p">,</span><span class="m">7</span><span class="p">,</span><span class="m">8</span><span class="p">),</span> <span class="n">x2</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="m">8</span><span class="p">,</span><span class="m">7</span><span class="p">,</span><span class="m">6</span><span class="p">,</span><span class="m">5</span><span class="p">),</span> <span class="n">x3</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">"D"</span><span class="p">,</span><span class="s">"D"</span><span class="p">,</span><span class="s">"F"</span><span class="p">,</span><span class="s">"C"</span><span class="p">))</span>
+<span class="n">cutoff</span> <span class="o">=</span> <span class="m">0.6</span>
+
+<span class="n">prob</span> <span class="o">=</span> <span class="nf">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="n">type</span><span class="o">=</span><span class="s">"raw"</span><span class="p">)</span>
+<span class="n">class.predicted</span> <span class="o">=</span> <span class="nf">as.class</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="s">"A"</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span>
+
+<span class="n">prob</span> <span class="o">%&gt;%</span> <span class="n">caption</span>
+<span class="n">class.predicted</span> <span class="o">%&gt;%</span> <span class="n">fmt</span>
+<span class="nf">cbind</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">class.predicted</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+
+<div class="output_html rendered_html output_subarea ">
+<table>
+<caption><center><font color="black"><b>prob</b></font></center></caption>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> A </th>
+   <th style="text-align:right;"> B </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 0.6996741 </td>
+   <td style="text-align:right;"> 0.3003259 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 0.4377705 </td>
+   <td style="text-align:right;"> 0.5622295 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 0.1963533 </td>
+   <td style="text-align:right;"> 0.8036467 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 0.0234317 </td>
+   <td style="text-align:right;"> 0.9765683 </td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+
+<div class="output_html rendered_html output_subarea ">
+<table>
+<thead><tr><th scope="col">class.predicted</th></tr></thead>
+<tbody>
+	<tr><td>A</td></tr>
+	<tr><td>B</td></tr>
+	<tr><td>B</td></tr>
+	<tr><td>B</td></tr>
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+
+<div class="output_html rendered_html output_subarea ">
+<table>
+<thead><tr><th scope="col">x1</th><th scope="col">x2</th><th scope="col">x3</th><th scope="col">class.predicted</th></tr></thead>
+<tbody>
+	<tr><td>5</td><td>8</td><td>D</td><td>A</td></tr>
+	<tr><td>6</td><td>7</td><td>D</td><td>B</td></tr>
+	<tr><td>7</td><td>6</td><td>F</td><td>B</td></tr>
+	<tr><td>8</td><td>5</td><td>C</td><td>B</td></tr>
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Expectations">Expectations<a class="anchor-link" href="#Expectations">¶</a></h2><p>Know about this:</p>
+<ul>
+<li>How to build a naive bayes model based on classified data, and use it to predict the classes of new observations, conceptually and using R's <code>naiveBayes</code> and <code>predict</code> functions.</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Further-Reading">Further Reading<a class="anchor-link" href="#Further-Reading">¶</a></h2><ul>
+<li><a href="http://www.cs.columbia.edu/~mcollins/em.pdf">http://www.cs.columbia.edu/~mcollins/em.pdf</a></li>
 <li><a href="http://ciml.info/dl/v0_99/ciml-v0_99-ch09.pdf">http://ciml.info/dl/v0_99/ciml-v0_99-ch09.pdf</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Naive_Bayes_classifier">https://en.wikipedia.org/wiki/Naive_Bayes_classifier</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Bayes%27_theorem">https://en.wikipedia.org/wiki/Bayes%27_theorem</a></li>
 <li><a href="https://www.quora.com/How-does-Laplacian-add-1-smoothing-work-for-a-Naive-Bayes-classfier-algorithm">https://www.quora.com/How-does-Laplacian-add-1-smoothing-work-for-a-Naive-Bayes-classfier-algorithm</a></li>
+<li><a href="https://norvig.com/spell-correct.html">https://norvig.com/spell-correct.html</a></li>
 </ul>
 
 </div>
