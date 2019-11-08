@@ -34,7 +34,7 @@ suppressMessages(library(polyclip))
 suppressMessages(library(psych))
 suppressMessages(library(readxl))
 suppressMessages(library(reshape2))
-suppressMessages(library(rgl)) # All rglwidget() calls must use elementID="myplot"
+suppressMessages(library(rgl))
 suppressMessages(library(rmarkdown))
 suppressMessages(library(rpart))
 suppressMessages(library(rpart.plot))
@@ -96,6 +96,13 @@ custom_name_repair = function(x) { x = gsub("\\((.+)\\)", "\\.\\1", x)
 
 dummify = function(...) suppressWarnings(dummy.data.frame(...))
 
+fmt.dm = function(dm) { d = as.data.frame(as.matrix(dm))
+                        d1 = adply(1:ncol(d), 1, function(j) sprintf("%0.4f", d[,j]))
+                        d1 = d1[, -1]
+                        row.names(d1) = row.names(d)
+                        names(d1) = names(d)
+                        d1 }
+
 focus_data = function(data, hit, emphasis=10) { prob.x = as.numeric(as.character(factor(hit, levels=c(TRUE, FALSE), labels=c(1,emphasis))))
                                                 prob = prob.x / sum(prob.x)
                                                 data[sample(1:nrow(data), replace=TRUE, prob=prob),] }
@@ -103,9 +110,11 @@ focus_data = function(data, hit, emphasis=10) { prob.x = as.numeric(as.character
 # front = function(x) c(tail(x,1), head(x,-1))
 front = function(d) { x = colnames(d); d[, c(tail(x,1), head(x,-1))] }
 
-gaussian = function(x, mean, sd) { (1/(sd*sqrt(2*pi))) * exp(-0.5 * ((x-mean)/sd)^2) }
+# gaussian = function(x, mean, sd) { (1/(sd*sqrt(2*pi))) * exp(-0.5 * ((x-mean)/sd)^2) }
+gaussian = function(x, mean, sd, size=1) { size * (1/(sd*sqrt(2*pi))) * exp(-0.5 * ((x-mean)/sd)^2) }
 
-gaussian2 = function(grid, mean, cm) { aaply(1:nrow(grid), 1, function(i) { dmvnorm(c(grid[i,1],grid[i,2]), mean=mean, sigma=cm) } ) }
+# gaussian2 = function(grid, mean, cm) { aaply(1:nrow(grid), 1, function(i) { dmvnorm(c(grid[i,1],grid[i,2]), mean=mean, sigma=cm) } ) }
+gaussian2 = function(grid, mean, cm, size=1) { size * aaply(1:nrow(grid), 1, function(i) { dmvnorm(c(grid[i,1],grid[i,2]), mean=mean, sigma=cm) } ) }
 
 get.cor = function(cm) { cm[1,2] / sqrt(cm[1,1]) / sqrt(cm[2,2]) }
 
@@ -129,7 +138,7 @@ impute = function(d)
 inside = function(point, polygon)
   { P = list(x=point[,1], y=point[,2])
     A = list(x=polygon[,1], y=polygon[,2])
-    as.logical(abs(pointinpolygon(P,A))) }
+    as.logical(abs(pointinpolygon(P,A, eps=0.001))) }
 
 kernel.gauss = function(x, mean, sd) { (1/(sd*sqrt(2*pi))) * exp(-0.5 * ((x-mean)/sd)^2) / 11 }
 
