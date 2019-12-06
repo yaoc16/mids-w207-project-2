@@ -10,6 +10,7 @@ suppressMessages(library(dplyr))
 
 suppressMessages(library(base64enc))
 suppressMessages(library(caret))
+suppressMessages(library(colorspace))
 suppressMessages(library(dummies))
 suppressMessages(library(e1071))
 suppressMessages(library(entropy))
@@ -18,6 +19,7 @@ suppressMessages(library(ggplot2))
 suppressMessages(library(ggwordcloud))
 suppressMessages(library(gridExtra))
 suppressMessages(library(htmltools))
+suppressMessages(library(igraph))
 suppressMessages(library(IRdisplay))
 #suppressMessages(library(kableExtra))
 suppressMessages(library(kknn))
@@ -32,6 +34,7 @@ suppressMessages(library(NLP))
 suppressMessages(library(pracma))
 suppressMessages(library(polyclip))
 suppressMessages(library(psych))
+suppressMessages(library(qgraph))
 suppressMessages(library(readxl))
 suppressMessages(library(reshape2))
 suppressMessages(library(rgl))
@@ -203,6 +206,24 @@ pick = function(d, f, labels=colnames(d)) { factor(aaply(d, 1, function(v) colna
 
 plain_var_names = function (d) { colnames(d) = gsub(" ", "_", colnames(d)); d }
 
+predict.cf = function(data, similarity, threshold=2, alpha=1)
+  { prediction = data
+    
+    for (i in 1:nrow(data))
+      for (item in 1:ncol(data))
+        { nn = which(rownames(data) %in% names(sort(similarity[-i,i], decreasing=TRUE))[1:threshold])
+          weight = similarity[i,nn]
+          rating = data[nn,item]
+          mean_rating.nn = rowMeans(data[nn,], na.rm=TRUE)
+          diff = rating - mean_rating.nn
+          weighted_mean_part = weighted.mean(diff, weight, na.rm=TRUE)
+        
+          mean_rating.i = rowMeans(data[i,], na.rm=TRUE)
+        
+          prediction[i,item] = mean_rating.i + (alpha*weighted_mean_part) }
+
+    prediction }
+
 regulate_columns = function(new.t, data.t) { i = intersect(colnames(data.t), colnames(new.t))
                                              j = setdiff(colnames(data.t), intersect(colnames(data.t), colnames(new.t)))
                                              d = as.data.frame(matrix(rep(0, nrow(new.t)*length(j)), nrow=nrow(new.t)))
@@ -249,6 +270,16 @@ sum_kernels.tri = function(x, x1, halfwidth) { aaply(x, 1, function(i) { sum(aap
 sum_kernels.gauss = function(x, x1, sd) { aaply(x, 1, function(i) { sum(aaply(x1, 1, function(j) kernel.gauss(i, j, sd))) } ) }
 
 sum_kernels.rect = function(x, x1, halfwidth) { aaply(x, 1, function(i) { sum(aaply(x1, 1, function(j) kernel.rect(i, j, halfwidth))) } ) }
+
+table.df = function(x, col.names=NULL)
+  { d = data.frame(names(table(path)), as.vector(table(path)))
+    if (!is.null(col.names)) colnames(d) = col.names
+    d }
+
+table_rel.df = function(x, col.names=NULL)
+  { d = data.frame(names(table(path)), as.vector(table(path))/sum(table(path)))
+    if (!is.null(col.names)) colnames(d) = col.names
+    d }
 
 toc = function(d, indent=0, html=TRUE, level=1)
   { space = if (html) "&nbsp;" else " "
@@ -301,5 +332,10 @@ scale_colour_discrete = function(...) scale_colour_manual(..., values=PALETTE)
 scale_fill_discrete   = function(...) scale_fill_manual(..., values=PALETTE)
 theme_update(plot.title=element_text(size=10, hjust=0.5), plot.subtitle=element_text(size=8, face="italic", hjust=0.5), axis.title=element_text(size=7), axis.text=element_text(size=7), strip.text=element_text(size=7), strip.text.y=element_text(angle=90), legend.title=element_blank(), legend.text=element_text(size=7))
 
+igraph_options(vertex.size=30, vertex.size2=15, vertex.shape="rectangle", vertex.frame.color="gray60",
+               vertex.label.cex=0.6, vertex.label.color="black", vertex.label.family="sans",
+               edge.color="gray40")
 
-"== document setup ==" %>% display_html
+"<p style=\"text-align:center; font-size:10px;\">
+.................................................... start of document ....................................................
+</p>" %>% display_html
