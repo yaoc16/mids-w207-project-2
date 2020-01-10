@@ -1,0 +1,12 @@
+﻿user_id,item_id,user,item,rating,rating2
+0,0,amit,seahawks,3,1
+0,1,amit,sf giants,3,1
+0,2,amit,warriors,3,1
+1,3,aryana,patriots,3,1
+1,2,aryana,warriors,5,1
+2,4,mital,steelers,5,1
+2,5,mital,penguins,4,1
+2,6,mital,pirates,3,1
+2,7,mital,celtics,1,1
+3,4,kaiden,steelers,5,1
+4,2,anika,warriors,5,1

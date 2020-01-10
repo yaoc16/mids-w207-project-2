@@ -1,0 +1,6 @@
+# ipython notebook intermediate files
+/*.ipynb_checkpoints
+.ipynb_checkpoints
+
+# pesky mac files
+.DS_Store
